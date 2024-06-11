@@ -54,17 +54,13 @@ impl<K, N> HmacSha256<K, N> {
         }
     }
 
-    pub fn compute(self) -> [u8; 32] {
-        let mut inner_pad: [u8; 128] = [0; 128];
-        for i in 0..64 {
-            inner_pad[i] = self.inner_key_pad[i];
-        }
+    pub fn compute<I>(self, _: I) -> [u8; 32] {
+        let mut inner_pad: [u8] = [];
+        inner_pad = inner_pad.append(self.inner_key_pad.as_slice());
+        inner_pad = inner_pad.append(self.message.as_slice());
 
-        for i in 64..128 {
-            inner_pad[i] = self.message[i-64];
-        }
-
-        let hash_i_pad = sha256_var(inner_pad, 128);
+        let inner_pad: [u8; I] = inner_pad.as_array();
+        let hash_i_pad = sha256_var(inner_pad, inner_pad.len());
 
         let mut outer_pad: [u8; 96] = [0; 96];
 
@@ -72,8 +68,8 @@ impl<K, N> HmacSha256<K, N> {
             outer_pad[i] = self.outer_key_pad[i];
         }
 
-        for i in 64..96 {
-            outer_pad[i] = hash_i_pad[i-64];
+        for i in 0..32 {
+            outer_pad[i + 64] = hash_i_pad[i];
         }
 
         let hmac = sha256_var(outer_pad, 96);
