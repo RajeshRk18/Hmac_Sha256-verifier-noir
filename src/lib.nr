@@ -11,7 +11,8 @@ fn test() {
     let expected: [u8; 32] = [232, 252, 220, 195, 159, 115, 4, 76, 151, 50, 208, 166, 13, 168, 209, 59, 18, 51, 226, 79, 67, 46, 89, 56, 186, 151, 180, 128, 218, 230, 27, 155];
 
     let hmac = HmacSha256::init(response, key);
-    let computed_tag = hmac.compute(response.len() + SHA256_BLOCKSIZE);
+    let inner_pad_size = response.len() + SHA256_BLOCKSIZE;
+    let computed_tag = hmac.compute(inner_pad_size);
    // println(computed_tag);
     assert(computed_tag == expected);
 }
